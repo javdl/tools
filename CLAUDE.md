@@ -13,7 +13,7 @@ Collection of standalone HTML+JavaScript tools hosted on GitHub Pages at tools.j
 python -m http.server 8000
 
 # Run all tests
-pip install -e . && playwright install
+uv pip install -e . && playwright install
 pytest
 
 # Run a single test
