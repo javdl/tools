@@ -15,6 +15,7 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 - [Social media cropper](https://tools.joostvanderlaan.nl/social-media-cropper) crop images to 2×1 for social sharing
 - [Image resize and quality comparison](https://tools.joostvanderlaan.nl/image-resize-quality) compare JPEG quality settings
 - [Image to JPEG](https://tools.joostvanderlaan.nl/image-to-jpeg) convert PNG or WebP files to JPEG
+- [HEIC to JPG](https://tools.joostvanderlaan.nl/heic-to-jpg) convert Apple HEIC/HEIF images to JPG
 - [Image to SVG](https://tools.joostvanderlaan.nl/image-to-svg) trace bitmap images to SVG paths
 - [SVG to JPEG/PNG](https://tools.joostvanderlaan.nl/svg-render) render an SVG to a raster image
 - [SVG sandbox](https://tools.joostvanderlaan.nl/svg-sandbox) display decoded SVG files safely
