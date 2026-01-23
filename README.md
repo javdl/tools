@@ -83,6 +83,7 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 - [Passkeys demo](https://tools.joostvanderlaan.nl/passkeys) experiment with browser-based passkey authentication
 
 ## LLM playgrounds and debuggers
+- [Source to Prompt](https://tools.joostvanderlaan.nl/source-to-prompt) convert local code projects into LLM-ready prompts
 - [Haiku](https://tools.joostvanderlaan.nl/haiku) generate haikus using Claude Haiku and your webcam
 - [Chrome Prompt Playground](https://tools.joostvanderlaan.nl/chrome-prompt-playground) run prompts on Chrome’s Gemini Nano
 - [Gemini bounding box visualizer](https://tools.joostvanderlaan.nl/gemini-bbox) visualize bounding boxes returned by Gemini
