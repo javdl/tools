@@ -100,6 +100,9 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 ## Generative art
 - [Lowland Chiaroscuro](https://tools.joostvanderlaan.nl/lowland-chiaroscuro) seeded generative Dutch nocturne with wind fields, layered glazes, and p5.js
 
+## Education
+- [Letters Oefenen](https://tools.joostvanderlaan.nl/letters-oefenen) three activities for kids to practice letter recognition, tracing, and word puzzles (Dutch)
+
 ## Miscellaneous
 - [Arena animated](https://tools.joostvanderlaan.nl/arena-animated) animated chart of the LMSYS Chatbot Arena
 - [California Clock Change](https://tools.joostvanderlaan.nl/california-clock-change) see when daylight saving time changes

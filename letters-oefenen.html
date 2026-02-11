@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letters Oefenen</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --red: #dc2626;
+            --red-light: #fee2e2;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            color: var(--gray-800);
+            -webkit-text-size-adjust: 100%;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .tab.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        .activity { display: none; }
+        .activity.active { display: block; }
+
+        .instruction {
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            min-height: 2em;
+        }
+
+        .instruction .target-letter {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--blue);
+        }
+
+        /* ── ABC Grid ── */
+        .abc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .abc-grid button {
+            width: 100%;
+            aspect-ratio: 1;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--gray-800);
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.1s, background 0.2s, border-color 0.2s;
+        }
+
+        .abc-grid button:active {
+            transform: scale(0.95);
+        }
+
+        .abc-grid button.correct {
+            background: var(--green-light);
+            border-color: var(--green);
+            color: var(--green);
+            animation: pop 0.3s ease;
+        }
+
+        .abc-grid button.wrong {
+            animation: shake 0.4s ease;
+        }
+
+        /* ── Tracing ── */
+        .trace-container {
+            text-align: center;
+        }
+
+        .trace-letter-display {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            display: inline-block;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .canvas-wrap canvas {
+            display: block;
+            width: 300px;
+            height: 300px;
+            touch-action: none;
+        }
+
+        .trace-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* ── Word Puzzle ── */
+        .word-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.15em;
+            color: var(--blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .word-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .word-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 14px 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--gray-800);
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.1s, background 0.2s, border-color 0.2s;
+        }
+
+        .word-option:active {
+            transform: scale(0.98);
+        }
+
+        .word-option.correct {
+            background: var(--green-light);
+            border-color: var(--green);
+            color: var(--green);
+            animation: pop 0.3s ease;
+        }
+
+        .word-option.wrong {
+            animation: shake 0.4s ease;
+        }
+
+        /* ── Shared ── */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: #1d4ed8; }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: 2px solid var(--gray-200);
+        }
+
+        .btn-secondary:hover { background: var(--gray-200); }
+
+        .celebrate {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--green);
+            text-align: center;
+            margin: 1.5rem 0;
+            animation: pop 0.5s ease;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ── Animations ── */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 400px) {
+            body { padding: 12px; }
+            h1 { font-size: 1.4rem; }
+            .tab { padding: 8px 10px; font-size: 0.85rem; }
+            .instruction { font-size: 1.1rem; }
+            .abc-grid { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+            .abc-grid button { font-size: 1.3rem; }
+            .canvas-wrap canvas { width: 260px; height: 260px; }
+            .word-display { font-size: 1.8rem; }
+            .word-options { grid-template-columns: 1fr 1fr; }
+            .word-option { font-size: 1rem; padding: 12px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Letters Oefenen</h1>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="abc">ABC Volgorde</button>
+        <button class="tab" data-tab="trace">Natekenen</button>
+        <button class="tab" data-tab="word">Woordpuzzel</button>
+    </div>
+
+    <!-- Activity 1: ABC Volgorde -->
+    <div id="abc" class="activity active">
+        <div class="instruction" id="abc-instruction">Tik op de letter: <span class="target-letter">a</span></div>
+        <div class="abc-grid" id="abc-grid"></div>
+        <div class="celebrate hidden" id="abc-done">Goed gedaan!</div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <button class="btn btn-primary hidden" id="abc-reset">Opnieuw</button>
+        </div>
+    </div>
+
+    <!-- Activity 2: Natekenen -->
+    <div id="trace" class="activity">
+        <div class="trace-container">
+            <div class="trace-letter-display" id="trace-label">Letter: a</div>
+            <div class="canvas-wrap">
+                <canvas id="trace-canvas"></canvas>
+            </div>
+            <div class="trace-nav">
+                <button class="btn btn-secondary" id="trace-prev">Vorige</button>
+                <button class="btn btn-secondary" id="trace-clear">Wissen</button>
+                <button class="btn btn-secondary" id="trace-next">Volgende</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity 3: Woordpuzzel -->
+    <div id="word" class="activity">
+        <div class="instruction" id="word-instruction">Welk woord is hetzelfde?</div>
+        <div class="word-display" id="word-display"></div>
+        <div class="word-options" id="word-options"></div>
+        <div class="celebrate hidden" id="word-done">Goed gedaan!</div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <button class="btn btn-primary hidden" id="word-next-btn">Volgend woord</button>
+        </div>
+    </div>
+
+    <script>
+    // ── Tabs ──
+    const tabs = document.querySelectorAll('.tab');
+    const activities = document.querySelectorAll('.activity');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            activities.forEach(a => a.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+            if (tab.dataset.tab === 'trace') initTraceCanvas();
+        });
+    });
+
+    // ── Utility ──
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ═══════════════════════════════════════
+    // Activity 1: ABC Volgorde
+    // ═══════════════════════════════════════
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    let abcIndex = 0;
+
+    function initABC() {
+        abcIndex = 0;
+        const grid = document.getElementById('abc-grid');
+        grid.innerHTML = '';
+        document.getElementById('abc-done').classList.add('hidden');
+        document.getElementById('abc-reset').classList.add('hidden');
+        const instruction = document.getElementById('abc-instruction');
+        instruction.classList.remove('hidden');
+        instruction.innerHTML = 'Tik op de letter: <span class="target-letter">a</span>';
+
+        const shuffled = shuffle(alphabet);
+        shuffled.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.textContent = letter;
+            btn.dataset.letter = letter;
+            btn.addEventListener('click', () => handleABCTap(btn));
+            grid.appendChild(btn);
+        });
+    }
+
+    function handleABCTap(btn) {
+        if (btn.classList.contains('correct')) return;
+        const expected = alphabet[abcIndex];
+        if (btn.dataset.letter === expected) {
+            btn.classList.add('correct');
+            abcIndex++;
+            if (abcIndex < 26) {
+                document.getElementById('abc-instruction').innerHTML =
+                    `Tik op de letter: <span class="target-letter">${alphabet[abcIndex]}</span>`;
+            } else {
+                document.getElementById('abc-instruction').classList.add('hidden');
+                document.getElementById('abc-done').classList.remove('hidden');
+                document.getElementById('abc-reset').classList.remove('hidden');
+            }
+        } else {
+            btn.classList.remove('wrong');
+            void btn.offsetWidth; // force reflow to restart animation
+            btn.classList.add('wrong');
+            setTimeout(() => btn.classList.remove('wrong'), 400);
+        }
+    }
+
+    document.getElementById('abc-reset').addEventListener('click', initABC);
+    initABC();
+
+    // ═══════════════════════════════════════
+    // Activity 2: Natekenen (Letter Tracing)
+    // ═══════════════════════════════════════
+    const traceCanvas = document.getElementById('trace-canvas');
+    const ctx = traceCanvas.getContext('2d');
+    let traceIndex = 0;
+    let drawing = false;
+    let lastPos = null;
+    let canvasReady = false;
+
+    function initTraceCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const cssSize = 300;
+        traceCanvas.width = cssSize * dpr;
+        traceCanvas.height = cssSize * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        canvasReady = true;
+        drawGuideLetter();
+    }
+
+    function drawGuideLetter() {
+        const cssSize = 300;
+        ctx.clearRect(0, 0, cssSize, cssSize);
+        // Draw guide letter in light gray
+        ctx.fillStyle = '#e5e7eb';
+        ctx.font = '220px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(alphabet[traceIndex], cssSize / 2, cssSize / 2 + 10);
+        document.getElementById('trace-label').textContent = `Letter: ${alphabet[traceIndex]}`;
+    }
+
+    function getCanvasPos(e) {
+        const rect = traceCanvas.getBoundingClientRect();
+        const cssSize = 300;
+        const scaleX = cssSize / rect.width;
+        const scaleY = cssSize / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    traceCanvas.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        traceCanvas.setPointerCapture(e.pointerId);
+        drawing = true;
+        lastPos = getCanvasPos(e);
+    });
+
+    traceCanvas.addEventListener('pointermove', (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getCanvasPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastPos.x, lastPos.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        lastPos = pos;
+    });
+
+    const endDraw = (e) => {
+        if (drawing) {
+            e.preventDefault();
+            drawing = false;
+            lastPos = null;
+        }
+    };
+    traceCanvas.addEventListener('pointerup', endDraw);
+    traceCanvas.addEventListener('pointercancel', endDraw);
+
+    document.getElementById('trace-prev').addEventListener('click', () => {
+        traceIndex = (traceIndex - 1 + 26) % 26;
+        drawGuideLetter();
+    });
+
+    document.getElementById('trace-next').addEventListener('click', () => {
+        traceIndex = (traceIndex + 1) % 26;
+        drawGuideLetter();
+    });
+
+    document.getElementById('trace-clear').addEventListener('click', () => {
+        drawGuideLetter();
+    });
+
+    // ═══════════════════════════════════════
+    // Activity 3: Woordpuzzel
+    // ═══════════════════════════════════════
+    const words = [
+        'banaan', 'school', 'dieren', 'winter', 'ridder',
+        'spelen', 'konijn', 'piraat', 'ballon', 'wortel',
+        'puzzel', 'gieter', 'vinger', 'slapen', 'appels'
+    ];
+    let wordList = [];
+    let wordIndex = 0;
+    let currentWord = '';
+
+    function initWordGame() {
+        wordList = shuffle(words);
+        wordIndex = 0;
+        loadWord();
+    }
+
+    // Generate a scrambled version that is guaranteed different from the original
+    function scrambleWord(word) {
+        const letters = word.split('');
+        let scrambled;
+        let attempts = 0;
+        do {
+            scrambled = shuffle(letters).join('');
+            attempts++;
+        } while (scrambled === word && attempts < 50);
+        return scrambled;
+    }
+
+    function loadWord() {
+        currentWord = wordList[wordIndex];
+        document.getElementById('word-done').classList.add('hidden');
+        document.getElementById('word-next-btn').classList.add('hidden');
+        document.getElementById('word-instruction').classList.remove('hidden');
+        document.getElementById('word-display').textContent = currentWord;
+
+        // Generate 5 unique scrambled versions + 1 correct
+        const options = new Set();
+        options.add(currentWord);
+        while (options.size < 6) {
+            options.add(scrambleWord(currentWord));
+        }
+
+        // Shuffle the options and render
+        const shuffledOptions = shuffle([...options]);
+        const optionsDiv = document.getElementById('word-options');
+        optionsDiv.innerHTML = '';
+        shuffledOptions.forEach(option => {
+            const btn = document.createElement('button');
+            btn.className = 'word-option';
+            btn.textContent = option;
+            btn.addEventListener('click', () => handleWordTap(btn, option));
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function handleWordTap(btn, option) {
+        if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+        if (option === currentWord) {
+            btn.classList.add('correct');
+            // Disable all other buttons
+            document.querySelectorAll('.word-option').forEach(b => {
+                if (b !== btn) b.style.opacity = '0.3';
+                b.style.pointerEvents = 'none';
+            });
+            document.getElementById('word-instruction').classList.add('hidden');
+            document.getElementById('word-done').classList.remove('hidden');
+            document.getElementById('word-next-btn').classList.remove('hidden');
+        } else {
+            btn.classList.remove('wrong');
+            void btn.offsetWidth;
+            btn.classList.add('wrong');
+            setTimeout(() => btn.classList.remove('wrong'), 400);
+        }
+    }
+
+    document.getElementById('word-next-btn').addEventListener('click', () => {
+        wordIndex = (wordIndex + 1) % wordList.length;
+        if (wordIndex === 0) wordList = shuffle(words);
+        loadWord();
+    });
+
+    initWordGame();
+    </script>
+</body>
+</html>

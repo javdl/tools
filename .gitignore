@@ -21,6 +21,7 @@ node_modules/
 
 # Playwright test output
 test-results/
+.playwright-mcp/
 
 # Claude Code
 .claude/settings.local.json
