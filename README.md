@@ -99,12 +99,14 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 
 ## Generative art
 - [Lowland Chiaroscuro](https://tools.joostvanderlaan.nl/lowland-chiaroscuro) seeded generative Dutch nocturne with wind fields, layered glazes, and p5.js
+- [Mason of Hearts](https://tools.joostvanderlaan.nl/mason-of-hearts) interactive Valentine's heart galaxy animation
 
 ## Education
 - [Letters Oefenen](https://tools.joostvanderlaan.nl/letters-oefenen) three activities for kids to practice letter recognition, tracing, and word puzzles (Dutch)
 
 ## Miscellaneous
 - [Arena animated](https://tools.joostvanderlaan.nl/arena-animated) animated chart of the LMSYS Chatbot Arena
+- [Amsterdam Clock Change](https://tools.joostvanderlaan.nl/amsterdam-clock-change) see when daylight saving time changes in Amsterdam
 - [California Clock Change](https://tools.joostvanderlaan.nl/california-clock-change) see when daylight saving time changes
 - [Open Sauce 2025 schedule](https://tools.joostvanderlaan.nl/open-sauce-2025) browse the upcoming conference sessions
 - [OpenFreeMap demo](https://tools.joostvanderlaan.nl/openfreemap-demo) MapLibre demo with random points in San Francisco
