@@ -99,7 +99,7 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 
 ## Generative art
 - [Lowland Chiaroscuro](https://tools.joostvanderlaan.nl/lowland-chiaroscuro) seeded generative Dutch nocturne with wind fields, layered glazes, and p5.js
-- [Mason of Hearts](https://tools.joostvanderlaan.nl/mason-of-hearts) interactive Valentine's heart galaxy animation
+- [Hartendief](https://tools.joostvanderlaan.nl/hartendief) interactive Valentine's heart galaxy animation
 
 ## Education
 - [Letters Oefenen](https://tools.joostvanderlaan.nl/letters-oefenen) three activities for kids to practice letter recognition, tracing, and word puzzles (Dutch)
