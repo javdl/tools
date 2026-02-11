@@ -100,6 +100,9 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 ## Generative art
 - [Lowland Chiaroscuro](https://tools.joostvanderlaan.nl/lowland-chiaroscuro) seeded generative Dutch nocturne with wind fields, layered glazes, and p5.js
 - [Hartendief](https://tools.joostvanderlaan.nl/hartendief) interactive Valentine's heart galaxy animation
+- [Floris de Dino](https://tools.joostvanderlaan.nl/floris) orbiting dinosaur galaxy animation
+- [Mats de Racer](https://tools.joostvanderlaan.nl/mats) orbiting racing car galaxy animation
+- [Julian's Ballen](https://tools.joostvanderlaan.nl/julian) orbiting toy ball galaxy animation
 
 ## Education
 - [Letters Oefenen](https://tools.joostvanderlaan.nl/letters-oefenen) three activities for kids to practice letter recognition, tracing, and word puzzles (Dutch)
