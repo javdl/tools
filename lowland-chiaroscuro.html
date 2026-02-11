@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<!--
+    THIS IS A TEMPLATE THAT SHOULD BE USED EVERY TIME AND MODIFIED.
+    WHAT TO KEEP:
+    ✓ Overall structure (header, sidebar, main content)
+    ✓ Anthropic branding (colors, fonts, layout)
+    ✓ Seed navigation section (always include this)
+    ✓ Self-contained artifact (everything inline)
+
+    WHAT TO CREATIVELY EDIT:
+    ✗ The p5.js algorithm (implement YOUR vision)
+    ✗ The parameters (define what YOUR art needs)
+    ✗ The UI controls (match YOUR parameters)
+
+    Let your philosophy guide the implementation.
+    The world is your oyster - be creative!
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lowland Chiaroscuro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Anthropic Brand Colors */
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar h1 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .sidebar .subtitle {
+            color: var(--anthropic-mid-gray);
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        /* Control Sections */
+        .control-section {
+            margin-bottom: 32px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section h3::before {
+            content: '•';
+            color: var(--anthropic-orange);
+            font-weight: bold;
+        }
+
+        /* Seed Controls */
+        .seed-input {
+            width: 100%;
+            background: var(--anthropic-light);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--anthropic-light-gray);
+            text-align: center;
+        }
+
+        .seed-input:focus {
+            outline: none;
+            border-color: var(--anthropic-orange);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1);
+            background: white;
+        }
+
+        .seed-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .regen-button {
+            margin-bottom: 0;
+        }
+
+        /* Parameter Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--anthropic-light-gray);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #c86641;
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Color Pickers */
+        .color-group {
+            margin-bottom: 16px;
+        }
+
+        .color-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            margin-bottom: 4px;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-picker-container input[type="color"] {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        .color-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+        }
+
+        /* Buttons */
+        .button {
+            background: var(--anthropic-orange);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .button:hover {
+            background: #c86641;
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: var(--anthropic-blue);
+        }
+
+        .button.secondary:hover {
+            background: #5a8bb8;
+        }
+
+        .button.tertiary {
+            background: var(--anthropic-green);
+        }
+
+        .button.tertiary:hover {
+            background: #6b7b52;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .button-row .button {
+            flex: 1;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        #canvas-container {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(20, 20, 19, 0.1);
+            background: white;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--anthropic-mid-gray);
+            min-height: 720px;
+        }
+
+        /* Responsive - Stack on mobile */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .canvas-area {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Control Sidebar -->
+        <div class="sidebar">
+            <h1>Lowland Chiaroscuro</h1>
+            <div class="subtitle">A starry Dutch nocturne shaped by wind fields, layered glazes, and seeded stillness.</div>
+
+            <!-- Seed Section (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Seed</h3>
+                <input type="number" id="seed-input" class="seed-input" value="12345" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="button secondary" onclick="previousSeed()">← Prev</button>
+                    <button class="button secondary" onclick="nextSeed()">Next →</button>
+                </div>
+                <div class="seed-controls">
+                    <button class="button tertiary regen-button" onclick="randomSeedAndUpdate()">↻ Random</button>
+                    <button class="button secondary" onclick="updateSeed()">Go</button>
+                </div>
+            </div>
+
+            <!-- Parameters Section (CUSTOMIZE THIS FOR YOUR ART) -->
+            <div class="control-section">
+                <h3>Parameters</h3>
+
+                <div class="control-group">
+                    <label>Star Density</label>
+                    <div class="slider-container">
+                        <input type="range" id="starCount" min="1200" max="9000" step="100" value="3400" oninput="updateParam('starCount', this.value)">
+                        <span class="value-display" id="starCount-value">3400</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Wind Drift</label>
+                    <div class="slider-container">
+                        <input type="range" id="windDrift" min="0.1" max="2.2" step="0.05" value="0.85" oninput="updateParam('windDrift', this.value)">
+                        <span class="value-display" id="windDrift-value">0.85</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Sky Turbulence</label>
+                    <div class="slider-container">
+                        <input type="range" id="turbulence" min="0.001" max="0.02" step="0.0005" value="0.004" oninput="updateParam('turbulence', this.value)">
+                        <span class="value-display" id="turbulence-value">0.004</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Glaze Layers</label>
+                    <div class="slider-container">
+                        <input type="range" id="glazeLayers" min="8" max="120" step="1" value="44" oninput="updateParam('glazeLayers', this.value)">
+                        <span class="value-display" id="glazeLayers-value">44</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Canal Reflection</label>
+                    <div class="slider-container">
+                        <input type="range" id="reflectionDepth" min="0.2" max="1.3" step="0.05" value="0.78" oninput="updateParam('reflectionDepth', this.value)">
+                        <span class="value-display" id="reflectionDepth-value">0.78</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Horizon Ratio</label>
+                    <div class="slider-container">
+                        <input type="range" id="horizonLine" min="0.50" max="0.78" step="0.01" value="0.64" oninput="updateParam('horizonLine', this.value)">
+                        <span class="value-display" id="horizonLine-value">0.64</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colors Section -->
+            <div class="control-section">
+                <h3>Colors</h3>
+
+                <div class="color-group">
+                    <label>Nocturne Blue</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="color1" value="#0d1630" onchange="updateColor('color1', this.value)">
+                        <span class="color-value" id="color1-value">#0d1630</span>
+                    </div>
+                </div>
+
+                <div class="color-group">
+                    <label>Umber Glow</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="color2" value="#c58f5a" onchange="updateColor('color2', this.value)">
+                        <span class="color-value" id="color2-value">#c58f5a</span>
+                    </div>
+                </div>
+
+                <div class="color-group">
+                    <label>Moon Silver</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="color3" value="#b8cadc" onchange="updateColor('color3', this.value)">
+                        <span class="color-value" id="color3-value">#b8cadc</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Section (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Actions</h3>
+                <div class="button-row" style="margin-bottom: 8px;">
+                    <button class="button secondary" onclick="regenerate()">Regenerate</button>
+                    <button class="button" onclick="resetParameters()">Reset</button>
+                </div>
+                <button class="button tertiary" onclick="downloadPNG()">Download PNG</button>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <div id="canvas-container">
+                <div class="loading">Initializing generative art...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let params = {
+            seed: 12345,
+            starCount: 3400,
+            windDrift: 0.85,
+            turbulence: 0.004,
+            glazeLayers: 44,
+            reflectionDepth: 0.78,
+            horizonLine: 0.64,
+            colorPalette: ['#0d1630', '#c58f5a', '#b8cadc']
+        };
+
+        let defaultParams = JSON.parse(JSON.stringify(params));
+        let stars = [];
+        let buildings = [];
+        let windmills = [];
+        let moon = null;
+
+        function setup() {
+            const canvas = createCanvas(1200, 1200);
+            canvas.parent('canvas-container');
+            noLoop();
+            initializeSystem();
+
+            const loading = document.querySelector('.loading');
+            if (loading) loading.style.display = 'none';
+        }
+
+        function draw() {
+            // Static scene: rendering is triggered by parameter/seed updates.
+        }
+
+        function initializeSystem() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+            generateSceneData();
+            renderScene();
+        }
+
+        function generateSceneData() {
+            const skyLimit = height * params.horizonLine;
+
+            moon = {
+                x: random(width * 0.14, width * 0.34),
+                y: random(height * 0.09, height * 0.22),
+                r: random(42, 74),
+                glow: random(1.0, 1.4)
+            };
+
+            stars = [];
+            for (let i = 0; i < params.starCount; i++) {
+                const x = random(width);
+                const y = skyLimit * pow(random(), 0.83);
+                const intensity = pow(random(), 2.6);
+                const n = noise(x * params.turbulence * 190, y * params.turbulence * 190);
+                const drift = map(n, 0, 1, -1, 1) * params.windDrift * 9;
+                const size = map(intensity, 0, 1, 0.35, 2.3);
+                const trail = floor(map(intensity, 0, 1, 1, 6));
+
+                stars.push({
+                    x,
+                    y,
+                    intensity,
+                    drift,
+                    size,
+                    trail,
+                    anchor: intensity > 0.72 && random() < 0.25
+                });
+            }
+
+            buildings = [];
+            let cursor = -10;
+            while (cursor < width + 20) {
+                const w = random(28, 94);
+                const h = random(30, 138);
+                const roofType = random(['gable', 'step', 'flat']);
+                buildings.push({
+                    x: cursor,
+                    w,
+                    h,
+                    roofType,
+                    litChance: random(0.08, 0.24)
+                });
+                cursor += w + random(3, 11);
+            }
+
+            windmills = [];
+            const millCount = floor(random(1, 3));
+            for (let i = 0; i < millCount; i++) {
+                windmills.push({
+                    x: random(width * 0.08, width * 0.92),
+                    towerH: random(85, 150),
+                    bladeR: random(26, 42),
+                    bladeAngle: random(TWO_PI)
+                });
+            }
+        }
+
+        function renderScene() {
+            const skyLimit = height * params.horizonLine;
+            const sky = hexToRgb(params.colorPalette[0]);
+            const umber = hexToRgb(params.colorPalette[1]);
+            const silver = hexToRgb(params.colorPalette[2]);
+
+            for (let y = 0; y < height; y++) {
+                const t = y / (height - 1);
+                const horizonWarmth = smoothstep(params.horizonLine - 0.12, params.horizonLine + 0.02, t);
+                const r = lerp(4, sky.r, pow(1 - t, 0.35)) + horizonWarmth * umber.r * 0.13;
+                const g = lerp(6, sky.g, pow(1 - t, 0.42)) + horizonWarmth * umber.g * 0.10;
+                const b = lerp(12, sky.b, pow(1 - t, 0.48)) + horizonWarmth * umber.b * 0.08;
+                stroke(constrain(r, 0, 255), constrain(g, 0, 255), constrain(b, 0, 255));
+                line(0, y, width, y);
+            }
+
+            noStroke();
+            for (let i = 0; i < params.glazeLayers; i++) {
+                const y = random(skyLimit * 0.07, skyLimit * 0.97);
+                const swell = noise(i * 0.17, y * params.turbulence * 40);
+                const rx = random(width);
+                const rw = lerp(130, 460, swell);
+                const rh = lerp(50, 230, swell);
+                const alpha = lerp(4, 20, (1 - y / skyLimit)) * random(0.45, 1.15);
+                fill(umber.r, umber.g, umber.b, alpha);
+                ellipse(rx, y, rw, rh);
+            }
+
+            for (let ring = 8; ring >= 0; ring--) {
+                const k = ring / 8;
+                const rr = moon.r * (1 + k * moon.glow * 0.95);
+                const alpha = map(ring, 8, 0, 10, 125);
+                fill(
+                    lerp(umber.r, silver.r, 0.75),
+                    lerp(umber.g, silver.g, 0.75),
+                    lerp(umber.b, silver.b, 0.75),
+                    alpha
+                );
+                ellipse(moon.x, moon.y, rr * 2.2, rr * 2.2);
+            }
+
+            for (const s of stars) {
+                const angle = map(
+                    noise(s.x * params.turbulence * 210, s.y * params.turbulence * 210),
+                    0,
+                    1,
+                    -PI / 5,
+                    PI / 5
+                );
+                const vx = cos(angle) * s.drift;
+                const vy = sin(angle) * s.drift * 0.28;
+
+                for (let t = s.trail; t >= 0; t--) {
+                    const px = s.x - vx * t;
+                    const py = s.y - vy * t;
+                    if (px < 0 || px > width || py < 0 || py > skyLimit) continue;
+
+                    const fade = map(t, s.trail, 0, 0.25, 1);
+                    const warmth = 0.2 + s.intensity * 0.8;
+                    const r = lerp(silver.r, umber.r, warmth * 0.4);
+                    const g = lerp(silver.g, umber.g, warmth * 0.3);
+                    const b = lerp(silver.b, umber.b, warmth * 0.25);
+                    fill(r, g, b, 20 + s.intensity * 235 * fade);
+                    ellipse(px, py, s.size * fade + 0.12, s.size * fade + 0.12);
+                }
+
+                if (s.anchor) {
+                    stroke(silver.r, silver.g, silver.b, 120 + s.intensity * 110);
+                    strokeWeight(0.6);
+                    line(s.x - 2.5, s.y, s.x + 2.5, s.y);
+                    line(s.x, s.y - 2.5, s.x, s.y + 2.5);
+                    noStroke();
+                }
+            }
+
+            drawHorizonAndCity(skyLimit, umber);
+            drawWater(skyLimit, sky, silver, umber);
+        }
+
+        function drawHorizonAndCity(horizonY, umber) {
+            noStroke();
+            fill(10, 12, 19, 248);
+            rect(0, horizonY, width, height - horizonY);
+
+            for (const b of buildings) {
+                fill(11, 12, 18, 252);
+                rect(b.x, horizonY - b.h, b.w, b.h);
+
+                if (b.roofType === 'gable') {
+                    triangle(b.x, horizonY - b.h, b.x + b.w, horizonY - b.h, b.x + b.w * 0.5, horizonY - b.h - b.w * 0.32);
+                } else if (b.roofType === 'step') {
+                    const steps = floor(random(3, 6));
+                    const sw = b.w / steps;
+                    const sh = b.w * 0.08;
+                    for (let i = 0; i < steps; i++) {
+                        rect(b.x + i * sw, horizonY - b.h - (steps - i) * sh, sw * 0.92, sh);
+                    }
+                }
+
+                if (random() < b.litChance) {
+                    fill(umber.r, umber.g, umber.b, random(100, 165));
+                    const wy = horizonY - b.h + random(9, b.h - 10);
+                    rect(b.x + b.w * 0.25, wy, b.w * 0.18, 4);
+                    rect(b.x + b.w * 0.6, wy + random(-3, 5), b.w * 0.14, 4);
+                }
+            }
+
+            for (const m of windmills) {
+                fill(11, 12, 18, 255);
+                rect(m.x - 6, horizonY - m.towerH, 12, m.towerH);
+                ellipse(m.x, horizonY - m.towerH, 18, 8);
+
+                stroke(11, 12, 18, 255);
+                strokeWeight(2);
+                for (let i = 0; i < 4; i++) {
+                    const a = m.bladeAngle + i * HALF_PI;
+                    const x2 = m.x + cos(a) * m.bladeR;
+                    const y2 = horizonY - m.towerH + sin(a) * m.bladeR;
+                    line(m.x, horizonY - m.towerH, x2, y2);
+                }
+                noStroke();
+            }
+        }
+
+        function drawWater(horizonY, sky, silver, umber) {
+            for (let y = horizonY; y < height; y++) {
+                const t = map(y, horizonY, height, 0, 1);
+                const r = lerp(8, sky.r * 0.55, t);
+                const g = lerp(11, sky.g * 0.48, t);
+                const b = lerp(16, sky.b * 0.62, t);
+                stroke(r, g, b, 235);
+                line(0, y, width, y);
+            }
+
+            noStroke();
+            fill(silver.r, silver.g, silver.b, 55);
+            ellipse(moon.x + random(-12, 12), horizonY + (height - horizonY) * 0.13, moon.r * 0.75, moon.r * 0.18);
+
+            for (const s of stars) {
+                if (s.intensity < 0.7 || random() > 0.33) continue;
+
+                const length = map(s.intensity, 0.7, 1, 10, 95) * params.reflectionDepth;
+                const baseX = s.x + random(-2, 2);
+                const tint = map(s.intensity, 0.7, 1, 0.3, 0.85);
+
+                for (let k = 0; k < length; k++) {
+                    const jitter = (noise(baseX * 0.012, k * 0.06, params.seed * 0.0017) - 0.5) * (6 + params.windDrift * 4);
+                    const px = baseX + jitter;
+                    const py = horizonY + k + random(-0.6, 0.6);
+                    const alpha = map(k, 0, length, 105 * tint, 0);
+                    stroke(
+                        lerp(umber.r, silver.r, 0.62),
+                        lerp(umber.g, silver.g, 0.62),
+                        lerp(umber.b, silver.b, 0.62),
+                        alpha
+                    );
+                    point(px, py);
+                }
+            }
+
+            for (let i = 0; i < 220; i++) {
+                const y = random(horizonY + 4, height - 2);
+                const x = random(width);
+                const len = random(10, 62);
+                const alpha = random(6, 28);
+                stroke(silver.r, silver.g, silver.b, alpha);
+                line(x, y, x + len, y);
+            }
+        }
+
+        function updateParam(paramName, value) {
+            const integerParams = new Set(['starCount', 'glazeLayers']);
+            const floatFormats = {
+                windDrift: 2,
+                turbulence: 4,
+                reflectionDepth: 2,
+                horizonLine: 2
+            };
+
+            params[paramName] = integerParams.has(paramName) ? parseInt(value, 10) : parseFloat(value);
+
+            const valueEl = document.getElementById(paramName + '-value');
+            if (valueEl) {
+                if (floatFormats[paramName] !== undefined) {
+                    valueEl.textContent = params[paramName].toFixed(floatFormats[paramName]);
+                } else {
+                    valueEl.textContent = String(params[paramName]);
+                }
+            }
+
+            initializeSystem();
+        }
+
+        function updateColor(colorId, value) {
+            const indexMap = { color1: 0, color2: 1, color3: 2 };
+            const idx = indexMap[colorId];
+            params.colorPalette[idx] = value;
+            document.getElementById(colorId + '-value').textContent = value;
+            initializeSystem();
+        }
+
+        function regenerate() {
+            initializeSystem();
+        }
+
+        function downloadPNG() {
+            saveCanvas('lowland-chiaroscuro-seed-' + params.seed, 'png');
+        }
+
+        function updateSeedDisplay() {
+            document.getElementById('seed-input').value = params.seed;
+        }
+
+        function updateSeed() {
+            const input = document.getElementById('seed-input');
+            const newSeed = parseInt(input.value, 10);
+            if (newSeed && newSeed > 0) {
+                params.seed = newSeed;
+                initializeSystem();
+            } else {
+                updateSeedDisplay();
+            }
+        }
+
+        function previousSeed() {
+            params.seed = Math.max(1, params.seed - 1);
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function nextSeed() {
+            params.seed = params.seed + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function randomSeedAndUpdate() {
+            params.seed = Math.floor(Math.random() * 999999) + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function resetParameters() {
+            params = JSON.parse(JSON.stringify(defaultParams));
+
+            const paramIds = ['starCount', 'windDrift', 'turbulence', 'glazeLayers', 'reflectionDepth', 'horizonLine'];
+            const formats = {
+                windDrift: 2,
+                turbulence: 4,
+                reflectionDepth: 2,
+                horizonLine: 2
+            };
+
+            for (const id of paramIds) {
+                document.getElementById(id).value = params[id];
+                const display = document.getElementById(id + '-value');
+                display.textContent = formats[id] !== undefined ? params[id].toFixed(formats[id]) : String(params[id]);
+            }
+
+            document.getElementById('color1').value = params.colorPalette[0];
+            document.getElementById('color1-value').textContent = params.colorPalette[0];
+            document.getElementById('color2').value = params.colorPalette[1];
+            document.getElementById('color2-value').textContent = params.colorPalette[1];
+            document.getElementById('color3').value = params.colorPalette[2];
+            document.getElementById('color3-value').textContent = params.colorPalette[2];
+
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function hexToRgb(hex) {
+            const cleaned = hex.replace('#', '');
+            return {
+                r: parseInt(cleaned.substring(0, 2), 16),
+                g: parseInt(cleaned.substring(2, 4), 16),
+                b: parseInt(cleaned.substring(4, 6), 16)
+            };
+        }
+
+        function smoothstep(edge0, edge1, x) {
+            const t = constrain((x - edge0) / (edge1 - edge0), 0, 1);
+            return t * t * (3 - 2 * t);
+        }
+
+        window.addEventListener('load', function() {
+            updateSeedDisplay();
+        });
+    </script>
+</body>
+</html>

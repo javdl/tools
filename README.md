@@ -97,6 +97,9 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 - [GPT-4o Gist audio player](https://tools.joostvanderlaan.nl/gpt-4o-audio-player) play audio responses stored on GitHub Gist
 - [JSON schema builder](https://tools.joostvanderlaan.nl/json-schema-builder) build JSON schemas with a visual editor
 
+## Generative art
+- [Lowland Chiaroscuro](https://tools.joostvanderlaan.nl/lowland-chiaroscuro) seeded generative Dutch nocturne with wind fields, layered glazes, and p5.js
+
 ## Miscellaneous
 - [Arena animated](https://tools.joostvanderlaan.nl/arena-animated) animated chart of the LMSYS Chatbot Arena
 - [California Clock Change](https://tools.joostvanderlaan.nl/california-clock-change) see when daylight saving time changes
