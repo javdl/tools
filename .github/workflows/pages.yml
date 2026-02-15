@@ -67,6 +67,19 @@ jobs:
           git commit -m "Generated docs: ${{ steps.docs.outputs.stems }}" || exit 0
           git push
 
+      - name: Commit redirect files if changed
+        run: |-
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          # Read redirect sources from _redirects.json and stage their HTML files
+          python3 -c "
+          import json
+          with open('_redirects.json') as f:
+              for src in json.load(f):
+                  print(f'{src}.html')
+          " | xargs -r git add
+          git diff --cached --quiet || (git commit -m "Generated redirect files" && git push)
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
