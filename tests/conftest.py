@@ -2,6 +2,8 @@
 Pytest configuration and fixtures for the tools tests.
 """
 
+import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -70,6 +72,15 @@ class StaticServer:
                 self._process.kill()
                 self._process.wait()
             self._process = None
+
+
+@pytest.fixture(scope="session")
+def browser_type_launch_args():
+    """Use system chromium on NixOS where Playwright's bundled binary won't work."""
+    chromium_path = shutil.which("chromium") or shutil.which("chromium-browser")
+    if chromium_path:
+        return {"executable_path": chromium_path}
+    return {}
 
 
 @pytest.fixture

@@ -106,6 +106,7 @@ The code lives in [javdl/tools](https://github.com/javdl/tools).
 
 ## Education
 - [Letters Oefenen](https://tools.joostvanderlaan.nl/letters-oefenen) three activities for kids to practice letter recognition, tracing, and word puzzles (Dutch)
+- [Patronen Spel](https://tools.joostvanderlaan.nl/patronen-spel) pattern recognition coloring game for young children (Dutch)
 
 ## Miscellaneous
 - [Arena animated](https://tools.joostvanderlaan.nl/arena-animated) animated chart of the LMSYS Chatbot Arena
