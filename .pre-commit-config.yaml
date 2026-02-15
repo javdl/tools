@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: build-redirects
+        name: Build redirect HTML files
+        entry: python build_redirects.py
+        language: python
+        files: ^_redirects\.json$
+        pass_filenames: false
