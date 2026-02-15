@@ -247,3 +247,83 @@ def test_responsive_houses_visible(page: Page, unused_port_server):
     expect(page.locator("#houses-container")).to_be_visible()
     expect(page.locator(".house")).not_to_have_count(0)
     expect(page.locator(".house").first).to_be_visible()
+
+
+def test_patterns_has_10_levels(page: Page, unused_port_server):
+    """Test that the PATTERNS array has 10 levels"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    count = page.evaluate("PATTERNS.length")
+    assert count == 10
+
+
+def test_new_level_configurations(page: Page, unused_port_server):
+    """Test that each new level has correct house count and blank count"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    expected = [
+        (1, 6, 2), (2, 6, 3), (3, 8, 2), (4, 6, 3),
+        (5, 9, 3), (6, 8, 3), (7, 8, 4), (8, 8, 4),
+        (9, 10, 4), (10, 10, 5),
+    ]
+    for level, houses, blanks in expected:
+        result = page.evaluate(f"""(() => {{
+            const p = PATTERNS[{level - 1}];
+            return {{ level: p.level, houses: p.template.length, blanks: p.blanks }};
+        }})()""")
+        assert result["level"] == level
+        assert result["houses"] == houses
+        assert result["blanks"] == blanks
+
+
+def test_full_game_progression_10_levels(page: Page, unused_port_server):
+    """Test that the game progresses through all 10 levels"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    for level in range(1, 11):
+        expect(page.locator("#level-display")).to_have_text(f"Level {level}")
+        for round_num in range(3):
+            _complete_round(page)
+            page.locator("#next-btn").click()
+            page.wait_for_timeout(200)
+    expect(page.locator("#feedback")).to_contain_text("Alle levels voltooid!")
+
+
+def test_game_completion_after_level_10(page: Page, unused_port_server):
+    """Test game completion shows correct message and replay button after level 10"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    for level in range(1, 11):
+        for round_num in range(3):
+            _complete_round(page)
+            page.locator("#next-btn").click()
+            page.wait_for_timeout(200)
+    expect(page.locator("#feedback")).to_be_visible()
+    expect(page.locator("#feedback")).to_contain_text("Alle levels voltooid!")
+    expect(page.locator("#next-btn")).to_have_text("Opnieuw spelen")
+    expect(page.locator("#stars")).to_contain_text("⭐" * 10)
+
+
+def test_level_10_mobile_display(page: Page, unused_port_server):
+    """Test that level 10 patterns display correctly on mobile viewport"""
+    unused_port_server.start(root)
+    page.set_viewport_size({"width": 375, "height": 667})
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    page.evaluate("currentLevel = 10; currentRound = 1; updateDisplay(); startNewRound();")
+    page.wait_for_timeout(300)
+    houses = page.locator("#houses-container .house")
+    expect(houses).to_have_count(10)
+    for i in range(10):
+        expect(houses.nth(i)).to_be_visible()
+
+
+def test_level_5_house_count(page: Page, unused_port_server):
+    """Test that level 5 shows 9 houses with 3 blanks"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/patronen-spel.html")
+    page.evaluate("currentLevel = 5; currentRound = 1; updateDisplay(); startNewRound();")
+    page.wait_for_timeout(300)
+    houses = page.locator("#houses-container .house")
+    expect(houses).to_have_count(9)
+    blanks = page.locator("#houses-container .house.blank")
+    expect(blanks).to_have_count(3)
