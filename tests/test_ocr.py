@@ -45,3 +45,56 @@ def test_open_pdf(page: Page, unused_port_server):
     expect(page.locator("#fullDocument")).to_have_value(
         "Page 1\n\nSecond page\n\nPage the third"
     )
+
+
+def test_html_lang_attribute(page: Page, unused_port_server):
+    """Verify HTML tag has lang='en' attribute"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/ocr.html")
+    html_element = page.locator("html")
+    expect(html_element).to_have_attribute("lang", "en")
+
+
+def test_language_dropdown_populated(page: Page, unused_port_server):
+    """Verify language dropdown is populated with many options"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/ocr.html")
+    # Should have more than 50 language options
+    language_options = page.locator("#id_language option")
+    expect(language_options).to_have_count(102)  # LANGUAGES object has 102 entries
+    # Default should be English
+    expect(page.locator("#id_language")).to_have_value("eng")
+
+
+def test_copy_button_after_image_ocr(page: Page, unused_port_server):
+    """Verify copy button appears after OCR completes for an image"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/ocr.html")
+    file_input = page.locator("#fileInput")
+    file_input.set_input_files(str(test_dir / "ocr-test-text.png"))
+
+    # Wait for OCR to complete
+    expect(page.locator(".textarea-alt")).to_have_value("OCR test text")
+
+    # Check that a copy button exists
+    copy_button = page.locator("button:has-text('Copy')")
+    expect(copy_button).to_be_visible()
+
+
+def test_error_display_on_invalid_file(page: Page, unused_port_server):
+    """Verify error is shown when processing fails"""
+    unused_port_server.start(root)
+    page.goto(f"http://127.0.0.1:{unused_port_server.port}/ocr.html")
+
+    # Create a mock invalid file (empty blob)
+    page.evaluate("""
+        const file = new File([], 'invalid.pdf', { type: 'application/pdf' });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('fileInput').files = dt.files;
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    """)
+
+    # Should show an error message
+    error_element = page.locator(".error")
+    expect(error_element).to_be_visible()
