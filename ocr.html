@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>OCR PDFs and images directly in your browser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer data-domain="tools.joostvanderlaan.nl" src="https://plausible.io/js/script.js"></script>
   <script type="module">
-  import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/+esm';
+  import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/+esm';
+  window.pdfjsLib = pdfjsLib;
   pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs";
   </script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
+* {
+  box-sizing: border-box;
+}
 body {
   padding: 1em;
   font-family: helvetica, sans-serif;
@@ -60,6 +65,30 @@ textarea {
   font-size: 14px;
   cursor: pointer;
 }
+.copy-button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 14px;
+  cursor: pointer;
+}
+.copy-feedback {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: green;
+  font-size: 14px;
+}
+.error {
+  display: none;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+}
+.error.visible {
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -72,6 +101,8 @@ textarea {
   <div class="actions">
     <button id="loadExampleButton" type="button" aria-label="Load example PDF">Load example PDF</button>
   </div>
+
+  <div class="error" id="errorDiv"></div>
 
   <div class="dropzone" id="dropzone">
     Drag and drop a PDF, JPG, PNG, or GIF file here or click to select a file
@@ -93,6 +124,7 @@ const fullDocumentTextarea = document.getElementById('fullDocument');
 const fullDocumentSection = document.getElementById('fullDocumentSection');
 const languageSelect = document.getElementById('id_language');
 const loadExampleButton = document.getElementById('loadExampleButton');
+const errorDiv = document.getElementById('errorDiv');
 
 const EXAMPLE_URL = 'https://static.simonwillison.net/static/cors-allow/2025/attention-all-you-need.pdf';
 const DROPZONE_DEFAULT_TEXT = dropzone.innerText;
@@ -209,7 +241,7 @@ while (languageSelect.firstChild) {
   languageSelect.removeChild(languageSelect.firstChild);
 }
 
-for (const code of Object.values(Tesseract.languages)) {
+for (const code of Object.keys(LANGUAGES)) {
   const name = LANGUAGES[code];
   const option = document.createElement('option');
   option.value = code;
@@ -220,6 +252,25 @@ for (const code of Object.values(Tesseract.languages)) {
   languageSelect.appendChild(option);
 }
 
+function createCopyButton(textarea) {
+  const copyButton = document.createElement('button');
+  copyButton.textContent = 'Copy';
+  copyButton.className = 'copy-button';
+  copyButton.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(textarea.value);
+      const originalText = copyButton.textContent;
+      copyButton.textContent = 'Copied!';
+      setTimeout(() => {
+        copyButton.textContent = originalText;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  });
+  return copyButton;
+}
+
 function showFullDocument() {
   // Only shows if there are multiple populated textareas
   const populatedTextareas = Array.from(
@@ -228,10 +279,26 @@ function showFullDocument() {
   if (populatedTextareas.length > 1) {
     fullDocumentTextarea.value = populatedTextareas.map(ta => ta.value.trim()).join("\n\n");
     fullDocumentSection.style.display = 'block';
+
+    // Add copy button if it doesn't exist
+    if (!fullDocumentSection.querySelector('.copy-button')) {
+      const copyButton = createCopyButton(fullDocumentTextarea);
+      fullDocumentSection.appendChild(copyButton);
+    }
   } else {
     fullDocumentTextarea.value = '';
     fullDocumentSection.style.display = 'none';
   }
+}
+
+function showError(message) {
+  errorDiv.textContent = message;
+  errorDiv.classList.add('visible');
+}
+
+function hideError() {
+  errorDiv.textContent = '';
+  errorDiv.classList.remove('visible');
 }
 
 function setTextarea(ta, text) {
@@ -321,7 +388,8 @@ async function loadExamplePDF() {
 }
 
 async function processFile(file) {
-  const worker = await Tesseract.createWorker(languageSelect.value);
+  let worker = null;
+  hideError();
   fullDocumentTextarea.value = '';
   fullDocumentSection.style.display = 'none';
   imageContainer.innerHTML = '';
@@ -330,30 +398,39 @@ async function processFile(file) {
   dropzone.classList.add('disabled');
   fileSelectionAllowed = false;
 
-  if (file.type === 'application/pdf') {
-    const { numPages, imageIterator } = await convertPDFToImages(file);
-    let done = 0;
-    dropzone.innerText = `Processing ${numPages} page${numPages > 1 ? 's' : ''}`;
-    for await (const { imageURL } of imageIterator) {
+  try {
+    worker = await Tesseract.createWorker(languageSelect.value);
+
+    if (file.type === 'application/pdf') {
+      const { numPages, imageIterator } = await convertPDFToImages(file);
+      let done = 0;
+      dropzone.innerText = `Processing ${numPages} page${numPages > 1 ? 's' : ''}`;
+      for await (const { imageURL } of imageIterator) {
+        const ta = await displayImage(imageURL);
+        const { text } = await ocrImage(worker, imageURL);
+        setTextarea(ta, text);
+        showFullDocument();
+        done += 1;
+        dropzone.innerText = `Done ${done} of ${numPages}`;
+      }
+    } else {
+      const imageURL = URL.createObjectURL(file);
       const ta = await displayImage(imageURL);
       const { text } = await ocrImage(worker, imageURL);
       setTextarea(ta, text);
       showFullDocument();
-      done += 1;
-      dropzone.innerText = `Done ${done} of ${numPages}`;
     }
-  } else {
-    const imageURL = URL.createObjectURL(file);
-    const ta = await displayImage(imageURL);
-    const { text } = await ocrImage(worker, imageURL);
-    setTextarea(ta, text);
-    showFullDocument();
+  } catch (error) {
+    console.error('Error processing file:', error);
+    showError('Failed to process file. Please try again with a valid PDF or image file.');
+  } finally {
+    if (worker) {
+      await worker.terminate();
+    }
+    dropzone.innerText = originalText;
+    dropzone.classList.remove('disabled');
+    fileSelectionAllowed = true;
   }
-
-  await worker.terminate();
-  dropzone.innerText = originalText;
-  dropzone.classList.remove('disabled');
-  fileSelectionAllowed = true;
 }
 
 async function displayImage(imageURL) {
@@ -365,6 +442,10 @@ async function displayImage(imageURL) {
   altTextarea.classList.add('textarea-alt');
   altTextarea.placeholder = 'OCRing image...';
   imageContainer.appendChild(altTextarea);
+
+  // Add copy button for this page
+  const copyButton = createCopyButton(altTextarea);
+  imageContainer.appendChild(copyButton);
 
   return altTextarea;
 }
