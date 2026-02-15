@@ -120,6 +120,18 @@
             40%, 80% { transform: translateX(8px); }
         }
 
+        #houses-container.compact .house {
+            width: 55px;
+            height: 65px;
+        }
+
+        #houses-container.compact .house::before {
+            top: -24px;
+            border-left-width: 32px;
+            border-right-width: 32px;
+            border-bottom-width: 24px;
+        }
+
         #color-palette {
             display: flex;
             justify-content: center;
@@ -210,6 +222,13 @@
                 border-bottom-width: 25px;
             }
             .color-swatch { width: 50px; height: 50px; }
+            #houses-container.compact .house { width: 45px; height: 55px; }
+            #houses-container.compact .house::before {
+                top: -20px;
+                border-left-width: 26px;
+                border-right-width: 26px;
+                border-bottom-width: 20px;
+            }
             #feedback { font-size: 1.5rem; }
         }
     </style>
@@ -240,7 +259,13 @@
             { level: 1, template: ['A', 'B', 'A', 'B', 'A', 'B'], blanks: 2 },
             { level: 2, template: ['A', 'B', 'C', 'A', 'B', 'C'], blanks: 3 },
             { level: 3, template: ['A', 'A', 'B', 'B', 'A', 'A', 'B', 'B'], blanks: 2 },
-            { level: 4, template: ['A', 'B', 'B', 'A', 'B', 'B'], blanks: 3 }
+            { level: 4, template: ['A', 'B', 'B', 'A', 'B', 'B'], blanks: 3 },
+            { level: 5, template: ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C'], blanks: 3 },
+            { level: 6, template: ['A', 'A', 'B', 'C', 'A', 'A', 'B', 'C'], blanks: 3 },
+            { level: 7, template: ['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'], blanks: 4 },
+            { level: 8, template: ['A', 'B', 'A', 'C', 'A', 'B', 'A', 'C'], blanks: 4 },
+            { level: 9, template: ['A', 'A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'B'], blanks: 4 },
+            { level: 10, template: ['A', 'B', 'C', 'D', 'E', 'A', 'B', 'C', 'D', 'E'], blanks: 5 }
         ];
 
         let currentLevel = 1;
@@ -300,6 +325,12 @@
         function renderHouses() {
             const container = document.getElementById('houses-container');
             container.innerHTML = '';
+
+            if (currentPattern.length > 8) {
+                container.classList.add('compact');
+            } else {
+                container.classList.remove('compact');
+            }
 
             currentPattern.forEach((house, index) => {
                 const div = document.createElement('div');
@@ -424,8 +455,9 @@
                 stars++;
 
                 // Check if game is complete
-                if (currentLevel > 4) {
+                if (currentLevel > PATTERNS.length) {
                     // Game complete!
+                    updateStars();
                     document.getElementById('feedback').textContent = 'Alle levels voltooid! 🎉';
                     document.getElementById('feedback').classList.remove('hidden');
                     document.getElementById('next-btn').textContent = 'Opnieuw spelen';
